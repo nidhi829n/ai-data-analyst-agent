@@ -1,0 +1,197 @@
+{
+  "name": "Data Analyst Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nI am your Data Analyst Agent. How can I assist you today?",
+        "options": {
+          "inputPlaceholder": "Type your question..",
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "7bcfa4dc-b418-4c7c-8021-8551ae08176b",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "d098d797-fed2-4d05-88fc-961b481a85e9"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=<role>\nYou are the n8n Data Analyst AI Agent, a friendly expert on the n8n platform. Help users load and inspect spreadsheet data, answer questions, email results, guide step-by-step, narrate your actions, and turn raw data into clear, actionable insights.\n</role>\n\n<instructions>\n<goal>\nAssist users with Google Sheets and data tasks. When asked to execute a task, use the available tools to retrieve the latest data, perform analysis, summarize reports, count rows, or send professional messages.\n</goal>\n\n### Available Tools & Descriptions\n* **Google Sheets Tool:** Retrieves rows from a connected sheet. Always use this whenever required to fetch spreadsheet data.\n* **Gmail / Email Tool:** Sends professional messages. The recipient, subject, and action are already configured; you only need to provide the email body. Ask for address clarification if it is unclear what should be sent.\n</instructions>\n\n<formatting_rules>\n1. Format all responses as valid HTML. Do NOT generate plain text or Markdown. Use simple tags that render well (e.g., h2, h3, p, ul, li, strong, br).\n2. Follow this structure for reports:\n   <h2>Report Title</h2>\n   <p>Hello,</p>\n   <p>Here are the findings from the data:</p>\n   <h3>Section Heading</h3>\n   <ul>\n     <li>Point 1</li>\n     <li>Another finding</li>\n   </ul>\n   <p>Additional Notes: Add any important notes here.</p>\n   <p>Regards,<br>Data Analyst Team</p>\n3. Keep paragraphs concise and strong. Highlight high-value insights. Do not invent, modify, or fabricate data; preserve exact numbers and facts.\n4. Confirm when a response or email has been sent successfully.\n</formatting_rules>\n\n<context>\nCurrent Date & Time: {{ $now }}\n</context>"
+        }
+      },
+      "id": "2581b745-2031-4cbe-93f5-b1780c2f8f2c",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "aa0f986d-6872-4fe4-928e-1bc4dbcb33bc",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        208
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "vJTrcAhg2xt9ObPB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "dd1116e7-caf1-422a-91b3-3cd5dbd7f70a",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1d0PxMeJz1ooS2qCb17bN7IKFkBfr5XXjOtIJh0xD4jE/edit?gid=1888665280#gid=1888665280",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1888665280,
+          "mode": "list",
+          "cachedResultName": "Sales Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1d0PxMeJz1ooS2qCb17bN7IKFkBfr5XXjOtIJh0xD4jE/edit#gid=1888665280"
+        },
+        "options": {}
+      },
+      "id": "c3e1cd48-9f28-4b1e-9cf1-81df413091dd",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MnwhgVNApSHAgsmT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mishra2004nidhi@gmail.com",
+        "subject": "Analysis ",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        192
+      ],
+      "id": "42b564bf-c89a-4409-ac7d-c6c9e73776fc",
+      "name": "Send a message in Gmail",
+      "webhookId": "a3164f75-7103-47e0-a718-a851ee3a1d48",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dG0en5hw7YfYk9VE",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fd903dc5-f23a-4a61-a133-51ac403699e3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e5ce9c7fa619f04c792c158df422e4a70f6e3b4c5756d348c1f29bf0bbe9c4a4"
+  },
+  "nodeGroups": [],
+  "id": "ik55feZqMDRFw5tC",
+  "tags": []
+}
